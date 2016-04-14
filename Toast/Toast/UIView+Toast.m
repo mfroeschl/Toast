@@ -218,6 +218,9 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
         imageRect.size.width = imageView.bounds.size.width;
         imageRect.size.height = imageView.bounds.size.height;
     }
+
+    CGSize expectedSizeTitle = CGSizeMake(0.0, 0.0);
+    CGSize expectedSizeMessage = CGSizeMake(0.0, 0.0);
     
     if (title != nil) {
         titleLabel = [[UILabel alloc] init];
@@ -232,10 +235,9 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
         
         // size the title label according to the length of the text
         CGSize maxSizeTitle = CGSizeMake((self.bounds.size.width * style.maxWidthPercentage) - imageRect.size.width, self.bounds.size.height * style.maxHeightPercentage);
-        CGSize expectedSizeTitle = [titleLabel sizeThatFits:maxSizeTitle];
+        expectedSizeTitle = [titleLabel sizeThatFits:maxSizeTitle];
         // UILabel can return a size larger than the max size when the number of lines is 1
         expectedSizeTitle = CGSizeMake(MIN(maxSizeTitle.width, expectedSizeTitle.width), MIN(maxSizeTitle.height, expectedSizeTitle.height));
-        titleLabel.frame = CGRectMake(0.0, 0.0, expectedSizeTitle.width, expectedSizeTitle.height);
     }
     
     if (message != nil) {
@@ -250,15 +252,19 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
         messageLabel.text = message;
         
         CGSize maxSizeMessage = CGSizeMake((self.bounds.size.width * style.maxWidthPercentage) - imageRect.size.width, self.bounds.size.height * style.maxHeightPercentage);
-        CGSize expectedSizeMessage = [messageLabel sizeThatFits:maxSizeMessage];
+        expectedSizeMessage = [messageLabel sizeThatFits:maxSizeMessage];
         // UILabel can return a size larger than the max size when the number of lines is 1
         expectedSizeMessage = CGSizeMake(MIN(maxSizeMessage.width, expectedSizeMessage.width), MIN(maxSizeMessage.height, expectedSizeMessage.height));
-        messageLabel.frame = CGRectMake(0.0, 0.0, expectedSizeMessage.width, expectedSizeMessage.height);
     }
-    
+
+    CGFloat expectedMaxWidth = MAX(expectedSizeTitle.width, expectedSizeMessage.width);
+    expectedSizeTitle.width = expectedMaxWidth;
+    expectedSizeMessage.width = expectedMaxWidth;
+
     CGRect titleRect = CGRectZero;
     
     if(titleLabel != nil) {
+        titleLabel.frame = CGRectMake(0.0, 0.0, expectedSizeTitle.width, expectedSizeTitle.height);
         titleRect.origin.x = imageRect.origin.x + imageRect.size.width + style.horizontalPadding;
         titleRect.origin.y = style.verticalPadding;
         titleRect.size.width = titleLabel.bounds.size.width;
@@ -268,6 +274,7 @@ static const NSString * CSToastQueueKey             = @"CSToastQueueKey";
     CGRect messageRect = CGRectZero;
     
     if(messageLabel != nil) {
+        messageLabel.frame = CGRectMake(0.0, 0.0, expectedSizeMessage.width, expectedSizeMessage.height);
         messageRect.origin.x = imageRect.origin.x + imageRect.size.width + style.horizontalPadding;
         messageRect.origin.y = titleRect.origin.y + titleRect.size.height + style.verticalPadding;
         messageRect.size.width = messageLabel.bounds.size.width;
